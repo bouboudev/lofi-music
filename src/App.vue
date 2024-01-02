@@ -244,11 +244,12 @@ header {
   background: var(--couleur-principale);
   color: #fff;
 
-  h1 {
-    font-size: 40px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
+}
+
+header h1 {
+  font-size: 40px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 main {

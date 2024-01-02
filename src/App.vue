@@ -9,6 +9,10 @@
         <h2 class="song-title">
           {{ current.title }} - <span>{{ current.artist }}</span>
         </h2>
+        <div :key="current.src" class="image-container">
+          <img v-if="current.cover" :src="current.cover" alt="Music Cover" class="music-cover"
+            :class="{ 'loaded': imageLoaded }" @load="imageLoaded = true" />
+        </div>
         <div class="controls">
           <button class="prev" @click="prev">
             <i class="fas fa-backward"></i>
@@ -23,7 +27,7 @@
             <i class="fas fa-forward"></i>
           </button>
         </div>
-        <div class="progress-bar" @click="seek">
+        <div class="progress-bar" @click="updateProgressBar">
           <div class="progress" :style="{ width: (currentTime / duration) * 100 + '%' }"></div>
         </div>
 
@@ -32,13 +36,9 @@
         </div>
 
         <section class="playlist">
-          <h3>The PlayList</h3>
-          <button
-            v-for="song in songs"
-            :key="song.src"
-            @click="play(song)"
-            :class="song.src == current.src ? 'song playing' : 'song'"
-          >
+          <h3>Playlist</h3>
+          <button v-for="song in songs" :key="song.src" @click="play(song)"
+            :class="song.src == current.src ? 'song playing' : 'song'">
             {{ song.title }} - {{ song.artist }}
           </button>
         </section>
@@ -62,29 +62,33 @@ export default {
           title: "Morning Routine",
           artist: "Lofi Study Music",
           src: require("./assets/Morning-Routine-Lofi-Study-Music.mp3"),
+          cover: require("./assets/images/lofi-image.png"),
         },
         {
           title: "Still-Awake",
           artist: "Lofi Music",
           src: require("./assets/Still-Awake-Lofi-Study-Music.mp3"),
+          cover: require("./assets/images/lofi-image2.jpg"),
+
         },
         {
           title: "On My Way",
           artist: "Lofi Studio",
           src: require("./assets/On-My-Way-Lofi-Study-Music.mp3"),
+          cover: require("./assets/images/lofi-image3.jpg"),
+
         },
       ],
       player: new Audio(),
+      imageLoaded: false,
     };
   },
   methods: {
     play(song) {
       if (typeof song.src != "undefined") {
+        this.transitionCover();
         this.current = song;
-
         this.player.src = this.current.src;
-
-        
       }
 
       this.duration = this.player.duration;
@@ -119,7 +123,7 @@ export default {
 
       this.isPlaying = true;
     },
-    seek(event) {
+    updateProgressBar(event) {
       //changer la position de la musique en fonction de la position de la souris
       const progressBar = this.$el.querySelector('.progress-bar');
       const newTime = (event.offsetX / progressBar.clientWidth) * this.duration;
@@ -143,6 +147,8 @@ export default {
 
       clearInterval(this.timer);
       this.duration = this.player.duration;
+      this.transitionCover();
+
     },
     prev() {
       this.index--;
@@ -153,12 +159,16 @@ export default {
       this.play(this.current);
       clearInterval(this.timer);
       this.duration = this.player.duration;
+      this.transitionCover();
 
     },
     formatTime(time) {
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    },
+    transitionCover() {
+      this.imageLoaded = false;
     },
   },
   created() {
@@ -185,7 +195,7 @@ export default {
 
 :root {
   --couleur-principale: #1db954;
-  --couleur-secondaire: #1ed760; 
+  --couleur-secondaire: #1ed760;
 }
 
 body {
@@ -215,16 +225,19 @@ main {
   text-transform: uppercase;
   text-align: center;
 }
+
 .song-title span {
   font-weight: 500;
   font-style: italic;
 }
+
 .controls {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 30px 15px;
 }
+
 button {
   appearance: none;
   background: none;
@@ -232,9 +245,11 @@ button {
   outline: none;
   cursor: pointer;
 }
+
 button:hover {
   opacity: 0.8;
 }
+
 .play,
 .pause {
   font-size: 20px;
@@ -245,6 +260,7 @@ button:hover {
   color: #fff;
   background-color: var(--couleur-principale);
 }
+
 .next,
 .prev {
   font-size: 16px;
@@ -255,11 +271,13 @@ button:hover {
   color: #fff;
   background-color: var(--couleur-secondaire);
 }
+
 .playlist {
   padding: 0px 30px;
   background: #212121;
   padding: 5px 10px;
 }
+
 .playlist h3 {
   color: #fff;
   font-size: 40px;
@@ -268,6 +286,7 @@ button:hover {
   margin-top: 30px;
   text-align: center;
 }
+
 .playlist .song {
   display: block;
   width: 100%;
@@ -277,16 +296,16 @@ button:hover {
   cursor: pointer;
   color: #53565a;
 }
+
 .playlist .song:hover {
   color: var(--couleur-secondaire);
 }
+
 .playlist .song.playing {
   color: #fff;
-  background-image: linear-gradient(
-    to right,
-    var(--couleur-principale),
-    var(--couleur-secondaire)
-  );
+  background-image: linear-gradient(to right,
+      var(--couleur-principale),
+      var(--couleur-secondaire));
 }
 
 .progress-bar {
@@ -309,5 +328,26 @@ button:hover {
   font-weight: 700;
   color: #53565a;
   margin-top: 10px;
+}
+
+.image-container {
+  height: 400px;
+  overflow: hidden;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  transition: opacity 0.5s ease;
+}
+
+.music-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.music-cover.loaded {
+  opacity: 1;
 }
 </style>

@@ -14,6 +14,9 @@
             :class="{ 'loaded': imageLoaded }" @load="imageLoaded = true" />
         </div>
         <div class="controls">
+          <button class="stop" @click="stop">
+            <i class="fas fa-stop"></i>
+          </button>
           <button class="prev" @click="prev">
             <i class="fas fa-backward"></i>
           </button>
@@ -26,11 +29,8 @@
           <button class="next" @click="next">
             <i class="fas fa-forward"></i>
           </button>
-          <button class="repeat" @click="toggleRepeat">
-            <i class="fas fa-redo" :class="{ active: isRepeat }"></i>
-          </button>
-          <button class="repeat" @click="toggleRepeat">
-            <i class="fas fa-repeat" :class="{ active: isRepeat }"></i>
+          <button class="repeat" @click="toggleRepeat" :class="{ active: isRepeat }">
+            <i class="fas fa-redo"></i>
           </button>
         </div>
         <div class="progress-bar" @click="updateProgressBar">
@@ -182,6 +182,15 @@ export default {
 
     toggleRepeat() {
       this.isRepeat = !this.isRepeat;
+    },
+
+    stop() {
+      this.player.pause();
+      this.player.currentTime = 0;
+      this.isPlaying = false;
+      clearInterval(this.timer);
+      this.currentTime = 0;
+      this.duration = this.player.duration;
     },
     formatTime(time) {
       const minutes = Math.floor(time / 60);
@@ -376,7 +385,28 @@ button:hover {
   opacity: 1;
 }
 
-.controls button.repeat i.active {
+
+.repeat {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 10px 20px;
+  margin: 0px 15px;
+  border-radius: 6px;
+  background-color: #53565a;
+  color: #fff;
+}
+
+.repeat.active i {
   color: var(--couleur-principale);
+}
+
+.stop {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 10px 20px;
+  margin: 0px 15px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #53565a;
 }
 </style>

@@ -26,6 +26,12 @@
           <button class="next" @click="next">
             <i class="fas fa-forward"></i>
           </button>
+          <button class="repeat" @click="toggleRepeat">
+            <i class="fas fa-redo" :class="{ active: isRepeat }"></i>
+          </button>
+          <button class="repeat" @click="toggleRepeat">
+            <i class="fas fa-repeat" :class="{ active: isRepeat }"></i>
+          </button>
         </div>
         <div class="progress-bar" @click="updateProgressBar">
           <div class="progress" :style="{ width: (currentTime / duration) * 100 + '%' }"></div>
@@ -81,6 +87,7 @@ export default {
       ],
       player: new Audio(),
       imageLoaded: false,
+      isRepeat: false,
     };
   },
   methods: {
@@ -110,13 +117,23 @@ export default {
         "ended",
         () => {
           clearInterval(this.timer);
-          this.index++;
-          if (this.index > this.songs.length - 1) {
-            this.index = 0;
+          if (this.isRepeat) {
+            // Répéter la musique
+            this.currentTime = 0;
+            this.current = this.songs[this.index];
+            this.play(this.current);
+
+
+          } else {
+            // Passer à la musique suivante
+            this.index++;
+            if (this.index > this.songs.length - 1) {
+              this.index = 0;
+            }
+            this.current = this.songs[this.index];
+            this.currentTime = 0;
+            this.play(this.current);
           }
-          this.current = this.songs[this.index];
-          this.currentTime = 0;
-          this.play(this.current);
 
         }
       );
@@ -162,13 +179,21 @@ export default {
       this.transitionCover();
 
     },
+
+    toggleRepeat() {
+      this.isRepeat = !this.isRepeat;
+    },
     formatTime(time) {
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
     transitionCover() {
-      this.imageLoaded = false;
+      if (!this.isRepeat)
+        this.imageLoaded = false;
+      setTimeout(() => {
+        this.imageLoaded = true;
+      }, 10);
     },
   },
   created() {
@@ -349,5 +374,9 @@ button:hover {
 
 .music-cover.loaded {
   opacity: 1;
+}
+
+.controls button.repeat i.active {
+  color: var(--couleur-principale);
 }
 </style>

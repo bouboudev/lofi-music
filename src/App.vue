@@ -13,6 +13,13 @@
           <img v-if="current.cover" :src="current.cover" alt="Music Cover" class="music-cover"
             :class="{ 'loaded': imageLoaded }" @load="imageLoaded = true" />
         </div>
+        <div class="progress-bar" @click="updateProgressBar">
+          <div class="progress" :style="{ width: (currentTime / duration) * 100 + '%' }"></div>
+        </div>
+
+        <div class="time-display">
+          {{ formatTime(currentTime) }} / {{ formatTime(player.duration || 0) }}
+        </div>
         <div class="controls">
           <button class="stop" @click="stop">
             <i class="fas fa-stop"></i>
@@ -32,13 +39,6 @@
           <button class="repeat" @click="toggleRepeat" :class="{ active: isRepeat }">
             <i class="fas fa-redo"></i>
           </button>
-        </div>
-        <div class="progress-bar" @click="updateProgressBar">
-          <div class="progress" :style="{ width: (currentTime / duration) * 100 + '%' }"></div>
-        </div>
-
-        <div class="time-display">
-          {{ formatTime(currentTime) }} / {{ formatTime(player.duration || 0) }}
         </div>
 
         <section class="playlist">
@@ -243,6 +243,12 @@ header {
   padding: 55px;
   background: var(--couleur-principale);
   color: #fff;
+
+  h1 {
+    font-size: 40px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
 }
 
 main {
@@ -408,5 +414,91 @@ button:hover {
   border-radius: 6px;
   color: #fff;
   background-color: #53565a;
+}
+
+.stop:hover {
+  background-color: #53565a;
+}
+
+/* media queries mobile */
+@media (max-width: 768px) {
+  header {
+    padding: 30px;
+  }
+
+  header h1 {
+    font-size: 30px;
+  }
+
+  main {
+    padding: 30px;
+  }
+
+  .song-title {
+    font-size: 24px;
+  }
+
+  .controls {
+    padding: 15px;
+  }
+
+  .controls button {
+    font-size: 10px;
+  }
+
+  .playlist h3 {
+    font-size: 30px;
+  }
+
+  .playlist .song {
+    font-size: 16px;
+  }
+
+  .time-display {
+    font-size: 12px;
+  }
+
+  .image-container {
+    height: 300px;
+  }
+
+  .music-cover {
+    height: 100%;
+  }
+
+  .play,
+  .pause {
+    font-size: 16px;
+    font-weight: 700;
+    padding: 10px 20px;
+    margin: 0px 15px;
+    border-radius: 6px;
+    color: #fff;
+    background-color: var(--couleur-principale);
+  }
+
+  .next,
+  .prev {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 12px;
+    margin: 0px 15px;
+    border-radius: 6px;
+    color: #fff;
+    background-color: var(--couleur-secondaire);
+  }
+
+  .repeat,
+  .stop {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 12px;
+    margin: 0px 15px;
+    border-radius: 6px;
+    color: #fff;
+    background-color: #53565a;
+  }
+
+
 }
 </style>

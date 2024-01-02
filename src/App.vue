@@ -23,6 +23,13 @@
             <i class="fas fa-forward"></i>
           </button>
         </div>
+        <div class="progress-bar" @click="seek">
+          <div class="progress" :style="{ width: (currentTime / duration) * 100 + '%' }"></div>
+        </div>
+
+        <div class="time-display">
+          {{ formatTime(currentTime) }} / {{ formatTime(player.duration || 0) }}
+        </div>
 
         <section class="playlist">
           <h3>The PlayList</h3>
@@ -48,6 +55,8 @@ export default {
       current: {},
       index: 0,
       isPlaying: false,
+      currentTime: 0,
+      duration: 0,
       songs: [
         {
           title: "Morning Routine",
@@ -74,27 +83,55 @@ export default {
         this.current = song;
 
         this.player.src = this.current.src;
+
+        
       }
+
+      this.duration = this.player.duration;
+      this.currentTime = this.player.currentTime;
+
+      this.timer = setInterval(() => {
+        this.currentTime = this.player.currentTime;
+
+        // Ajuster la barre de progression
+        if (this.player.currentTime >= this.duration) {
+          clearInterval(this.timer);
+        }
+      }, 100);
 
       this.player.play();
 
       // musique terminé passe suivante
       this.player.addEventListener(
         "ended",
-        function() {
+        () => {
+          clearInterval(this.timer);
           this.index++;
           if (this.index > this.songs.length - 1) {
             this.index = 0;
           }
-        }.bind(this)
+          this.current = this.songs[this.index];
+          this.currentTime = 0;
+          this.play(this.current);
+
+        }
       );
 
       this.isPlaying = true;
+    },
+    seek(event) {
+      //changer la position de la musique en fonction de la position de la souris
+      const progressBar = this.$el.querySelector('.progress-bar');
+      const newTime = (event.offsetX / progressBar.clientWidth) * this.duration;
+      this.player.currentTime = newTime;
+      this.currentTime = newTime;
+      this.duration = this.player.duration;
     },
 
     pause() {
       this.player.pause();
       this.isPlaying = false;
+      clearInterval(this.timer);
     },
     next() {
       this.index++;
@@ -103,6 +140,9 @@ export default {
       }
       this.current = this.songs[this.index];
       this.play(this.current);
+
+      clearInterval(this.timer);
+      this.duration = this.player.duration;
     },
     prev() {
       this.index--;
@@ -111,11 +151,25 @@ export default {
       }
       this.current = this.songs[this.index];
       this.play(this.current);
+      clearInterval(this.timer);
+      this.duration = this.player.duration;
+
+    },
+    formatTime(time) {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
   },
   created() {
     this.current = this.songs[this.index];
     this.player.src = this.current.src;
+  },
+  mounted() {
+    // Récupérer la durée de la musique une fois qu'elle est chargée
+    this.player.addEventListener('loadedmetadata', () => {
+      this.duration = this.player.duration;
+    });
   },
 };
 </script>
@@ -130,8 +184,8 @@ export default {
 }
 
 :root {
-  --couleur-principale: #7d43b8;
-  --couleur-secondaire: #9088ff;
+  --couleur-principale: #1db954;
+  --couleur-secondaire: #1ed760; 
 }
 
 body {
@@ -143,7 +197,7 @@ header {
   justify-content: center;
   align-items: center;
   padding: 55px;
-  background: #212121;
+  background: var(--couleur-principale);
   color: #fff;
 }
 
@@ -233,5 +287,27 @@ button:hover {
     var(--couleur-principale),
     var(--couleur-secondaire)
   );
+}
+
+.progress-bar {
+  height: 10px;
+  background-color: #ccc;
+  position: relative;
+  cursor: pointer;
+}
+
+.progress {
+  height: 100%;
+  width: 0;
+  background-color: var(--couleur-secondaire);
+  transition: width 0.3s ease;
+}
+
+.time-display {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #53565a;
+  margin-top: 10px;
 }
 </style>
